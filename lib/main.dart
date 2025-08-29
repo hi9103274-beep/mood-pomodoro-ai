@@ -6,7 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 
-import 'ai_server.dart'; // ← AI 서비스
+import 'ai_server.dart'; // ← AI service
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -37,8 +37,8 @@ class _PomodoroPageState extends State<PomodoroPage> {
   int mood = 7; // 1~10
   bool isRunning = false;
   bool isBreak = false;
-  int left = 25 * 60; // 기본 25분
-  int completedSets = 0; // 4세트 사이클
+  int left = 25 * 60; // default 25 min
+  int completedSets = 0; // 4-set cycle
   Timer? timer;
 
   List<LogEntry> logs = [];
@@ -72,7 +72,7 @@ class _PomodoroPageState extends State<PomodoroPage> {
         } else {
           isBreak = false;
           if (completedSets >= 4) {
-            _snack('4세트 완료! 주간 성취도 확인해보세요 🎉');
+            _snack('4 sets completed! Check your weekly achievements 🎉');
             completedSets = 0;
           }
           left = _focusSecondsByMood(mood);
@@ -116,11 +116,11 @@ class _PomodoroPageState extends State<PomodoroPage> {
     logs.insert(0, entry);
     await _saveLogs();
 
-    _snack('집중 완료! 휴식 시작 ☕');
+    _snack('Focus completed! Break started ☕');
     _showAIFeedbackDialog();
   }
 
-  // ---------------- 저장/로드 ----------------
+  // ---------------- Save/Load ----------------
   Future<void> _saveLogs() async {
     final prefs = await SharedPreferences.getInstance();
     final raw = jsonEncode(logs.map((e) => e.toJson()).toList());
@@ -138,10 +138,10 @@ class _PomodoroPageState extends State<PomodoroPage> {
     }
   }
 
-  // ---------------- AI 피드백 ----------------
+  // ---------------- AI Feedback ----------------
   Future<void> _showAIFeedbackDialog() async {
     final recent = logs.take(5).map((e) => e.toJson()).toList();
-    String feedback = 'AI 피드백 생성 중...';
+    String feedback = 'Generating AI feedback...';
 
     if (!mounted) return;
     showDialog(
@@ -155,7 +155,7 @@ class _PomodoroPageState extends State<PomodoroPage> {
             if (mounted) setLocal(() => feedback = text);
           }();
           return AlertDialog(
-            title: const Text('AI 피드백'),
+            title: const Text('AI Feedback'),
             content: SizedBox(
               width: 360,
               child: SingleChildScrollView(child: Text(feedback)),
@@ -163,7 +163,7 @@ class _PomodoroPageState extends State<PomodoroPage> {
             actions: [
               TextButton(
                 onPressed: () => Navigator.pop(context),
-                child: const Text('닫기'),
+                child: const Text('Close'),
               ),
             ],
           );
@@ -195,9 +195,9 @@ class _PomodoroPageState extends State<PomodoroPage> {
     );
   }
 
-  // 주간 통계
+  // Weekly stats
   Widget _weeklyStats() {
-    if (logs.isEmpty) return const Text("아직 기록 없음");
+    if (logs.isEmpty) return const Text("No records yet");
     final now = DateTime.now();
     final thisWeek = logs.where((e) {
       final d = DateTime.tryParse(e.date);
@@ -214,16 +214,16 @@ class _PomodoroPageState extends State<PomodoroPage> {
 
     return Column(
       children: [
-        Text("이번 주 총 집중: ${totalMinutes}분"),
-        Text("평균 기분 점수: $avgMood/10"),
-        Text("완료 세트: ${thisWeek.length}회"),
+        Text("Total focus this week: ${totalMinutes} minutes"),
+        Text("Average mood score: $avgMood/10"),
+        Text("Completed sets: ${thisWeek.length} reps"),
       ],
     );
   }
 
   @override
   Widget build(BuildContext context) {
-    final label = isBreak ? '휴식' : '집중';
+    final label = isBreak ? 'Break' : 'Focus';
     return Scaffold(
       appBar: AppBar(
         title: const Text('Mood Pomodoro (AI)'),
@@ -246,7 +246,7 @@ class _PomodoroPageState extends State<PomodoroPage> {
               children: [
                 Row(
                   children: [
-                    const Text('기분'),
+                    const Text('Mood'),
                     Expanded(
                       child: Slider(
                         value: mood.toDouble(),
@@ -278,19 +278,19 @@ class _PomodoroPageState extends State<PomodoroPage> {
                     FilledButton.icon(
                         onPressed: isRunning ? null : start,
                         icon: const Icon(Icons.play_arrow),
-                        label: const Text("시작")),
+                        label: const Text("Start")),
                     OutlinedButton.icon(
                         onPressed: isRunning ? pause : null,
                         icon: const Icon(Icons.pause),
-                        label: const Text("일시정지")),
+                        label: const Text("Pause")),
                     TextButton.icon(
                         onPressed: reset,
                         icon: const Icon(Icons.restore),
-                        label: const Text("리셋")),
+                        label: const Text("Reset")),
                     OutlinedButton.icon(
                         onPressed: () => _showAIFeedbackDialog(),
                         icon: const Icon(Icons.auto_awesome),
-                        label: const Text("AI 피드백")),
+                        label: const Text("AI Feedback")),
                   ],
                 ),
                 const SizedBox(height: 16),
@@ -301,7 +301,7 @@ class _PomodoroPageState extends State<PomodoroPage> {
                     itemBuilder: (_, i) {
                       final e = logs[i];
                       return ListTile(
-                        title: Text("mood ${e.mood} • ${e.focusMinutes}분"),
+                        title: Text("Mood ${e.mood} • ${e.focusMinutes} min"),
                         subtitle: Text(e.date),
                       );
                     },
@@ -316,7 +316,7 @@ class _PomodoroPageState extends State<PomodoroPage> {
   }
 }
 
-// ---------------- 모델 ----------------
+// ---------------- Model ----------------
 class LogEntry {
   LogEntry({
     required this.date,
